@@ -1,13 +1,14 @@
 import TelegramBot, { Message } from "node-telegram-bot-api";
 import { readdirSync } from "fs";
 import { io, Socket } from "socket.io-client";
-
+import * as dotenv from "dotenv";
+dotenv.config();
 type ObjetoDeFunciones = { [clave: string]: (...args: any[]) => any };
 
-const token: string = "5554389898:AAGE0DL85vZbEoOQKBMHPQctxNtsM0gDSL4";
+const token: string = process.env.TOKEN_TELEGRAM || "";
 
 const bot: TelegramBot = new TelegramBot(token, { polling: true });
-const groupTelegram = -1001816752737;
+const groupTelegram = process.env.GROUP_TELEGRAM || "";
 // Carga dinámica de acciones
 const acciones: ObjetoDeFunciones = {};
 const archivosAcciones = readdirSync("./src/acciones");
@@ -55,7 +56,7 @@ bot.on("message", async (msg: Message) => {
 });
 
 // Cliente de Socket io
-const socket: Socket = io("http://162.214.164.60:8085/microsip");
+const socket: Socket = io(`${process.env.SERVER_SOCKET_IO}`);
 
 // Comprobar que se conecta al socket
 socket.on("connect", () => {
