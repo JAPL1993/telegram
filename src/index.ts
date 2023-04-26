@@ -64,6 +64,7 @@ socket.on("connect", () => {
 });
 
 socket.onAny(async (event: string, data: any) => {
+  // Comprueba si el evento tiene un comando y ejecuta la acción correspondiente
   const nombreEvento = `evento_${event}`;
   if (nombreEvento in eventos) {
     await eventos[nombreEvento](socket, bot, groupTelegram, data);
