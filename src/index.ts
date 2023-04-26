@@ -64,7 +64,6 @@ socket.on("connect", () => {
 });
 
 socket.onAny(async (event: string, data: any) => {
-  console.log(event);
   const nombreEvento = `evento_${event}`;
   if (nombreEvento in eventos) {
     await eventos[nombreEvento](socket, bot, groupTelegram, data);
