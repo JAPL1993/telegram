@@ -1,26 +1,30 @@
 import TelegramBot, { Message } from "node-telegram-bot-api";
 import { Socket } from "socket.io-client";
-import { chatArray } from "../utilidades/chats-array";
+import ChatClass from "../utilidades/chats-array";
 export default async (
   socket: Socket,
   bot: TelegramBot,
   groupTelegram: any,
   data: any
 ) => {
-  const index = chatArray.findIndex(
-    (item: any) => item.id_hash == data.id_hash
-  );
   try {
-    const message = await bot.editMessageText(
-      `${chatArray[index].message.text}
-    ERROR AL INSERTAR EL EVENTO.
+    await ChatClass.loadChats();
+    const chat = await ChatClass.getChat(data.id_hash);
+    if (chat != undefined) {
+      const message = await bot.editMessageText(
+        `${chat.message.text}
+    FOLIO INSERTADO CON EXITO.
        `,
-      {
-        chat_id: chatArray[index].message.chat.id,
-        message_id: chatArray[index].message.message_id,
-      }
-    );
-    chatArray[index].message = message as Message;
+        {
+          chat_id: chat.message.chat.id,
+          message_id: chat.message.message_id,
+        }
+      );
+      await ChatClass.updateChat({
+        hashId: data.id_hash,
+        message: message as Message,
+      });
+    }
   } catch (error) {
     console.log(error);
   }
