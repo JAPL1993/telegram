@@ -57,7 +57,8 @@ bot.on("message", async (msg: Message) => {
 
 // Cliente de Socket io
 const socket: Socket = io(`${process.env.SERVER_SOCKET_IO}`);
-
+let isQueue = false;
+const queue: any[] = [];
 // Comprobar que se conecta al socket
 socket.on("connect", () => {
   bot.sendMessage(groupTelegram, "Conectado al servido en namespace microsip");
@@ -67,6 +68,24 @@ socket.onAny(async (event: string, data: any) => {
   // Comprueba si el evento tiene un comando y ejecuta la acción correspondiente
   const nombreEvento = `evento_${event}`;
   if (nombreEvento in eventos) {
-    await eventos[nombreEvento](socket, bot, groupTelegram, data);
+    if (isQueue) {
+      queue.push({ nombreEvento, data });
+    } else {
+      queue.push({ nombreEvento, data });
+      await QueueProcess(socket, bot, groupTelegram);
+    }
   }
 });
+
+async function QueueProcess(
+  socket: Socket,
+  bot: TelegramBot,
+  groupTelegram: any
+) {
+  isQueue = true;
+  while (queue.length > 0) {
+    const { nombreEvento, data } = queue.shift();
+    await eventos[nombreEvento](socket, bot, groupTelegram, data);
+  }
+  isQueue = false;
+}
